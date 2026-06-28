@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>煞得剛剛好 ｜ 渦電流煞車互動教材</title>
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#0f1a30; --panel:#13203a; --panel2:#1b2c4d;
+    --ink:#eaf1ff; --sub:#9fb3d6; --line:#28406e;
+    --brand:#3ea6ff; --brand2:#6ee7ff; --accent:#ffd166; --good:#4ade80; --bad:#fb7185;
+    --copper:#d98a52; --alu:#c7d0dc; --mag:#e64a5a;
+    --r:16px; --shadow:0 12px 40px rgba(0,0,0,.35);
+    --fs:16px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",system-ui,sans-serif;
+    background:radial-gradient(1200px 700px at 80% -10%,#16264a 0%,var(--bg) 55%) fixed;
+    color:var(--ink); font-size:var(--fs); line-height:1.75; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--brand2)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+  /* ===== Nav ===== */
+  header.nav{
+    position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);
+    background:rgba(11,18,32,.78);border-bottom:1px solid var(--line);
+  }
+  .nav-in{display:flex;align-items:center;gap:14px;max-width:1080px;margin:0 auto;padding:10px 20px}
+  .logo{font-weight:800;letter-spacing:.5px;display:flex;align-items:center;gap:9px;white-space:nowrap}
+  .logo .dot{width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 30% 30%,var(--brand2),var(--brand));box-shadow:0 0 14px var(--brand)}
+  nav.links{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+  nav.links a{
+    color:var(--sub);text-decoration:none;font-size:14px;padding:7px 11px;border-radius:10px;font-weight:600;
+  }
+  nav.links a:hover{color:var(--ink);background:var(--panel2)}
+  .menu-btn{display:none;margin-left:auto;background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:8px 12px;font-size:18px;cursor:pointer}
+
+  /* ===== Hero ===== */
+  .hero{position:relative;overflow:hidden;padding:64px 0 40px}
+  .hero canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.5}
+  .hero .wrap{position:relative}
+  .badge{display:inline-flex;gap:8px;align-items:center;background:var(--panel2);border:1px solid var(--line);
+    color:var(--brand2);font-size:13px;font-weight:700;padding:6px 13px;border-radius:999px;margin-bottom:18px}
+  .hero h1{font-size:clamp(28px,5vw,48px);line-height:1.25;margin:.1em 0 .25em;font-weight:900;
+    background:linear-gradient(120deg,#fff,#bcd6ff 60%,var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .lead{font-size:clamp(16px,2.2vw,20px);color:var(--sub);max-width:760px}
+  .pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+  .pill{background:var(--panel);border:1px solid var(--line);padding:8px 14px;border-radius:12px;font-size:14px;font-weight:600;color:#cfe0ff}
+  .pill b{color:var(--accent)}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+  .btn{cursor:pointer;border:none;font-weight:800;font-size:15px;padding:13px 22px;border-radius:12px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:.15s}
+  .btn.primary{background:linear-gradient(120deg,var(--brand),#2b78d4);color:#fff;box-shadow:0 8px 24px rgba(62,166,255,.35)}
+  .btn.primary:hover{transform:translateY(-2px)}
+  .btn.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{border-color:var(--brand)}
+
+  /* ===== Sections ===== */
+  section{padding:54px 0;border-top:1px solid rgba(40,64,110,.5)}
+  .eyebrow{color:var(--brand2);font-weight:800;letter-spacing:2px;font-size:13px;text-transform:uppercase}
+  h2.sec{font-size:clamp(24px,4vw,34px);margin:.25em 0 .35em;font-weight:900}
+  .sec-sub{color:var(--sub);max-width:820px;margin-bottom:8px}
+
+  .grid{display:grid;gap:18px}
+  .card{background:linear-gradient(180deg,var(--panel),#101b32);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow)}
+  .card h3{margin:.1em 0 .4em;font-size:19px}
+  .card p{color:#d4e0f5;margin:.3em 0}
+  .muted{color:var(--sub)}
+
+  .panel{background:linear-gradient(180deg,var(--panel),#101b32);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+
+  /* ===== Controls ===== */
+  .control{margin:14px 0}
+  .control label{display:flex;justify-content:space-between;font-weight:700;font-size:14px;margin-bottom:6px}
+  .control label .val{color:var(--accent);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;height:6px;border-radius:6px;-webkit-appearance:none;background:linear-gradient(90deg,var(--brand),var(--brand2));outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--brand);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--brand);cursor:pointer}
+  .segrow{display:flex;gap:8px;flex-wrap:wrap}
+  .seg{flex:1;min-width:64px;text-align:center;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 6px;cursor:pointer;font-weight:700;font-size:14px;color:var(--sub);transition:.12s}
+  .seg.active{background:linear-gradient(120deg,var(--brand),#2b78d4);color:#fff;border-color:var(--brand)}
+  .seg:hover{color:var(--ink)}
+
+  .readout{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  .stat .n{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums;color:#fff}
+  .stat .k{font-size:12px;color:var(--sub);margin-top:2px}
+
+  .tag{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}
+  .tag.iv{background:rgba(62,166,255,.16);color:var(--brand2);border:1px solid rgba(62,166,255,.35)}
+  .tag.dv{background:rgba(255,209,102,.14);color:var(--accent);border:1px solid rgba(255,209,102,.35)}
+  .tag.cv{background:rgba(148,163,184,.16);color:#cbd5e1;border:1px solid rgba(148,163,184,.35)}
+
+  /* experiments */
+  .exp{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+  .exp summary{cursor:pointer;list-style:none;padding:16px 18px;display:flex;align-items:center;gap:14px;font-weight:800}
+  .exp summary::-webkit-details-marker{display:none}
+  .exp .num{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(120deg,var(--brand),#2b78d4);color:#fff;font-weight:900}
+  .exp summary .chev{margin-left:auto;color:var(--sub);transition:.2s}
+  .exp[open] summary .chev{transform:rotate(180deg)}
+  .exp .body{padding:0 18px 18px;border-top:1px solid var(--line)}
+  .vars{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+  .exp ol{margin:8px 0;padding-left:20px}
+  .exp ol li{margin:3px 0;color:#d4e0f5}
+
+  table.rec{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+  table.rec th,table.rec td{border:1px solid var(--line);padding:8px 10px;text-align:center}
+  table.rec th{background:var(--panel2);color:#dbe7ff}
+
+  ul.clean{list-style:none;padding:0;margin:0}
+  ul.clean li{padding:9px 0 9px 30px;position:relative;color:#d4e0f5;border-bottom:1px dashed rgba(40,64,110,.5)}
+  ul.clean li::before{content:"";position:absolute;left:4px;top:16px;width:9px;height:9px;border-radius:50%;background:var(--brand2);box-shadow:0 0 10px var(--brand2)}
+  ul.safe li::before{background:var(--bad);box-shadow:0 0 10px var(--bad)}
+
+  /* quiz */
+  .q{margin:14px 0;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+  .q .qt{font-weight:800;margin-bottom:10px}
+  .opt{display:block;width:100%;text-align:left;margin:7px 0;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);cursor:pointer;font-size:15px;transition:.12s}
+  .opt:hover{border-color:var(--brand)}
+  .opt.correct{background:rgba(74,222,128,.18);border-color:var(--good);color:#bbf7d0}
+  .opt.wrong{background:rgba(251,113,133,.16);border-color:var(--bad);color:#fecdd3}
+  .explain{margin-top:8px;font-size:14px;color:var(--sub);display:none}
+  .explain.show{display:block}
+
+  .refs li{margin:8px 0;color:#d4e0f5;font-size:14px}
+  footer{padding:40px 0 70px;color:var(--sub);font-size:14px;border-top:1px solid var(--line)}
+
+  .two{grid-template-columns:1fr 1fr}
+  .three{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:860px){
+    .two,.three{grid-template-columns:1fr}
+    nav.links{display:none;position:absolute;top:56px;right:14px;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:var(--shadow)}
+    nav.links.open{display:flex}
+    .menu-btn{display:block}
+    .readout{grid-template-columns:repeat(3,1fr)}
+  }
+  .float-note{font-size:13px;color:var(--sub);background:rgba(62,166,255,.08);border:1px solid rgba(62,166,255,.25);border-radius:10px;padding:10px 12px;margin-top:10px}
+  canvas{display:block;width:100%;border-radius:12px;background:#0a1426}
+  #eddyCanvas,#simCanvas{height:300px}
+  #lenzCanvas{height:260px}
+  @media(max-width:560px){#eddyCanvas,#simCanvas{height:260px}}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--sub);margin-top:10px}
+  .legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:5px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="nav-in">
+    <div class="logo"><span class="dot"></span>渦電流煞車・互動教材</div>
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <nav class="links" id="links">
+      <a href="#intro">主題</a>
+      <a href="#principle">原理</a>
+      <a href="#lenz">冷次定律</a>
+      <a href="#sim">煞車模擬</a>
+      <a href="#exps">六大實驗</a>
+      <a href="#materials">材料安全</a>
+      <a href="#quiz">小測驗</a>
+      <a href="#refs">參考</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero" id="top">
+  <canvas id="heroCanvas"></canvas>
+  <div class="wrap">
+    <h1>煞得剛剛好<br>不同開槽鋁片結構對渦電流煞車的影響</h1>
+    <p class="lead">不用碰到車子，磁鐵就能讓小車慢慢停下來。這就是「渦電流煞車」。
+      在這個互動教材裡，你可以親手調整鋁片的開槽方式、磁鐵距離與斜坡高度，
+      看看怎樣才能讓小車<strong>剛剛好</strong>停在停車格裡。</p>
+    <div class="pills">
+      <span class="pill">適用：<b>國小中高年級</b></span>
+      <span class="pill">核心問題：<b>能不能用結構設計控制煞車？</b></span>
+      <span class="pill">關鍵字：<b>渦電流・冷次定律</b></span>
+    </div>
+    <div class="cta">
+      <a href="#sim" class="btn primary">🚗 直接玩煞車模擬器</a>
+      <a href="#principle" class="btn ghost">先看看原理</a>
+    </div>
+  </div>
+</div>
+
+<!-- INTRO -->
+<section id="intro">
+  <div class="wrap">
+    <div class="eyebrow">研究動機</div>
+    <h2 class="sec">為什麼磁鐵能「隔空煞車」？</h2>
+    <p class="sec-sub">強力磁鐵掉進鋁管時會慢慢落下；金屬片經過磁鐵旁邊速度也會變慢。
+      鋁和銅明明不會被磁鐵吸住，卻能讓物體減速——這種看不見、摸不到的力量，正是我們研究的起點。</p>
+    <div class="grid three" style="margin-top:20px">
+      <div class="card">
+        <h3>🔍 一個有趣的觀察</h3>
+        <p>很多實驗只比較「磁鐵在哪種金屬管掉得比較慢」。能證明渦電流存在，卻看不出<strong>如何控制</strong>煞車效果。</p>
+      </div>
+      <div class="card">
+        <h3>🛠 我們換個方向</h3>
+        <p>改用<strong>玩具車＋強力磁鐵＋可替換開槽鋁片</strong>，研究槽線比例、方向、距離與速度如何改變停止距離。</p>
+      </div>
+      <div class="card">
+        <h3>🎯 核心問題</h3>
+        <p>不是問「渦電流是否存在」，而是「<strong>能不能用結構設計，把煞車調到剛剛好</strong>」——這更像工程設計。</p>
+      </div>
+    </div>
+    <div class="float-note">💡 與歷屆科展的差異：避開單純「磁鐵落管」題型，把重點放在<strong>鋁片結構設計、停止距離穩定性與指定停車區達成率</strong>。</div>
+  </div>
+</section>
+
+<!-- PRINCIPLE -->
+<section id="principle">
+  <div class="wrap">
+    <div class="eyebrow">原理動畫</div>
+    <h2 class="sec">渦電流是怎麼產生的？</h2>
+    <p class="sec-sub">當磁鐵和金屬之間有<strong>相對運動</strong>，金屬內部的磁場一直改變，
+      就會誘發出一圈一圈的環狀感應電流——這就是「渦電流」（渦＝像水的漩渦）。
+      這些電流會產生反向磁場，像看不見的手把磁鐵拉住。</p>
+    <div class="panel" style="padding:18px;margin-top:18px">
+      <canvas id="eddyCanvas" height="300"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--mag)"></i>磁鐵</span>
+        <span><i style="background:var(--alu)"></i>鋁片（導體）</span>
+        <span><i style="background:#6ee7ff"></i>感應出的渦電流</span>
+        <span><i style="background:var(--good)"></i>阻礙運動的反作用力</span>
+      </div>
+      <div class="control" style="margin-top:14px">
+        <label>磁鐵移動速度 <span class="val" id="spdVal">中</span></label>
+        <input type="range" id="eddySpeed" min="0" max="100" value="55">
+      </div>
+      <p class="muted" style="font-size:14px;margin:6px 0 0">
+        試著把速度拉到最低——速度越慢，渦電流越弱，反作用力（綠色箭頭）也越小。
+        這就是為什麼小車一開始減速很快，快停下來時卻變得很慢。</p>
+    </div>
+  </div>
+</section>
+
+<!-- LENZ -->
+<section id="lenz">
+  <div class="wrap">
+    <div class="eyebrow">冷次定律</div>
+    <h2 class="sec">反抗變化的「煞車手」</h2>
+    <p class="sec-sub">冷次定律可以用一句話記住：<strong>感應電流產生的效果，會反抗造成它的變化。</strong>
+      磁鐵靠近時，鋁片想「推開」它；磁鐵離開時，鋁片又想「拉住」它。不管哪個方向，都在阻礙運動。</p>
+    <div class="panel two grid" style="padding:18px;margin-top:18px;align-items:center">
+      <div>
+        <canvas id="lenzCanvas" height="260"></canvas>
+        <p class="muted" style="font-size:13px;text-align:center;margin:8px 0 0">拖曳磁鐵左右移動，觀察感應電流方向反轉</p>
+      </div>
+      <div>
+        <div class="card" style="box-shadow:none;background:var(--panel2)">
+          <h3 id="lenzState">把磁鐵推近鋁片 →</h3>
+          <p id="lenzText" class="muted">磁鐵靠近時，鋁片產生的感應電流會形成<strong>同極</strong>磁場把磁鐵推開（排斥）；
+            離開時則形成<strong>異極</strong>磁場把它拉住（吸引）。兩種情況都讓磁鐵「不好移動」。</p>
+        </div>
+        <div class="float-note">🧠 對國小學生：不必背公式，只要記得「<strong>動得越快，被擋得越用力</strong>」就抓到精神了。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SIMULATOR -->
+<section id="sim">
+  <div class="wrap">
+    <div class="eyebrow">核心互動</div>
+    <h2 class="sec">🚗 渦電流煞車模擬器</h2>
+    <p class="sec-sub">小車從斜坡滑下，衝進中間的「煞車區」（放著鋁片）。調整下面四個變因，按「發射」，
+      看看小車會不會<strong>剛好停在綠色停車格</strong>裡。這正是研究要找的最佳組合！</p>
+
+    <div class="panel" style="padding:18px;margin-top:18px">
+      <canvas id="simCanvas" height="300"></canvas>
+
+      <div class="readout" style="margin-top:14px">
+        <div class="stat"><div class="n" id="rSpeed">0</div><div class="k">進入速度 (cm/s)</div></div>
+        <div class="stat"><div class="n" id="rDist">–</div><div class="k">停止距離 (cm)</div></div>
+        <div class="stat"><div class="n" id="rResult">就緒</div><div class="k">停車結果</div></div>
+      </div>
+
+      <div class="grid two" style="margin-top:20px">
+        <div>
+          <div class="control">
+            <label>① 開槽比例 <span class="val" id="vSlot">0%（完整鋁片）</span></label>
+            <div class="segrow" id="segSlot">
+              <div class="seg active" data-v="0">0%</div>
+              <div class="seg" data-v="25">25%</div>
+              <div class="seg" data-v="50">50%</div>
+              <div class="seg" data-v="75">75%</div>
+            </div>
+            <p class="muted" style="font-size:13px;margin:6px 0 0">槽開越多，渦電流的路被切斷越多，煞車變弱。</p>
+          </div>
+
+          <div class="control">
+            <label>② 開槽方向 <span class="val" id="vDir">直槽</span></label>
+            <div class="segrow" id="segDir">
+              <div class="seg active" data-v="straight">直槽</div>
+              <div class="seg" data-v="cross">橫槽</div>
+              <div class="seg" data-v="diag">斜槽</div>
+              <div class="seg" data-v="grid">網格</div>
+            </div>
+            <p class="muted" style="font-size:13px;margin:6px 0 0">方向決定渦電流的環路好不好繞，也影響左右是否穩定。</p>
+          </div>
+        </div>
+
+        <div>
+          <div class="control">
+            <label>③ 磁鐵與鋁片距離 <span class="val" id="vGap">1.0 cm</span></label>
+            <input type="range" id="rngGap" min="5" max="20" value="10" step="1">
+            <p class="muted" style="font-size:13px;margin:6px 0 0">距離越近磁場越強、煞車越用力；太近會卡住或吸附。</p>
+          </div>
+          <div class="control">
+            <label>④ 斜坡高度（進入速度） <span class="val" id="vRamp">10 cm</span></label>
+            <input type="range" id="rngRamp" min="5" max="15" value="10" step="1">
+            <p class="muted" style="font-size:13px;margin:6px 0 0">坡越高，小車衝越快，越難停得剛好。</p>
+          </div>
+          <div class="cta" style="margin-top:8px">
+            <button class="btn primary" id="launchBtn">▶ 發射小車</button>
+            <button class="btn ghost" id="resetBtn">↺ 重置</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="float-note" id="advice">🎯 目標：讓小車停在綠色停車格（煞車區後 40–60 cm）內。提示：完整鋁片煞車最強，但太強會停太短；試著用「開槽」把煞車調弱一點點。</div>
+    </div>
+
+    <div class="grid three" style="margin-top:18px">
+      <div class="card"><span class="tag iv">自變因</span><h3 style="margin-top:8px">我們改變什麼</h3><p class="muted">開槽比例、開槽方向、磁鐵距離、進入速度（斜坡高度）。</p></div>
+      <div class="card"><span class="tag dv">應變因</span><h3 style="margin-top:8px">我們測量什麼</h3><p class="muted">停止距離、是否衝出範圍、左右偏移、指定停車區成功率。</p></div>
+      <div class="card"><span class="tag cv">控制變因</span><h3 style="margin-top:8px">什麼要固定</h3><p class="muted">小車重量、磁鐵大小、軌道角度、起點、煞車區長度、測量方式。</p></div>
+    </div>
+    <p class="muted" style="font-size:13px;margin-top:12px">＊本模擬器以簡化物理模型呈現趨勢（速度相關阻力＋摩擦力），用來幫助理解變因關係；真實數據仍需親手實驗測量。</p>
+  </div>
+</section>
+
+<!-- EXPERIMENTS -->
+<section id="exps">
+  <div class="wrap">
+    <div class="eyebrow">實驗設計</div>
+    <h2 class="sec">六大實驗：一步步把煞車調到剛好</h2>
+    <p class="sec-sub">從「確認現象」到「最佳化設計」，每個實驗只改變一個主要變因，其他都固定。
+      每組條件至少重複 5 次（建議 10 次），計算平均值與誤差。</p>
+    <div class="grid" id="expList" style="margin-top:18px"></div>
+  </div>
+</section>
+
+<!-- MATERIALS & SAFETY -->
+<section id="materials">
+  <div class="wrap">
+    <div class="eyebrow">材料・工具・安全</div>
+    <h2 class="sec">動手前要準備什麼</h2>
+    <div class="grid two" style="margin-top:18px">
+      <div class="panel" style="padding:20px">
+        <h3 style="margin-top:0">🧰 主要材料與工具</h3>
+        <ul class="clean" id="matList"></ul>
+      </div>
+      <div>
+        <div class="panel" style="padding:20px">
+          <h3 style="margin-top:0">💻 軟體與數據分析</h3>
+          <ul class="clean" id="softList"></ul>
+        </div>
+        <div class="panel" style="padding:20px;margin-top:18px;border-color:rgba(251,113,133,.4)">
+          <h3 style="margin-top:0;color:var(--bad)">⚠️ 安全注意事項</h3>
+          <ul class="clean safe" id="safeList"></ul>
+        </div>
+      </div>
+    </div>
+    <div class="panel" style="padding:20px;margin-top:18px">
+      <h3 style="margin-top:0">📊 數據怎麼分析</h3>
+      <ul class="clean" id="anaList"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="wrap">
+    <div class="eyebrow">小測驗</div>
+    <h2 class="sec">你抓到重點了嗎？</h2>
+    <p class="sec-sub">點選你認為正確的答案，立刻看到解析。共 5 題。</p>
+    <div id="quizBox" style="margin-top:14px"></div>
+    <div class="panel" style="padding:18px;margin-top:16px;text-align:center">
+      <div class="n" style="font-size:28px;font-weight:900" id="score">0 / 5</div>
+      <div class="muted">答對題數</div>
+    </div>
+  </div>
+</section>
+
+<!-- REFS -->
+<section id="refs">
+  <div class="wrap">
+    <div class="eyebrow">參考文獻</div>
+    <h2 class="sec">想更深入？看看這些資料</h2>
+    <ol class="refs" id="refList" style="margin-top:14px;padding-left:20px"></ol>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    設計者：陳賢宗（黑熊老師）　·　Email：<a href="mailto:prayer168@gmail.com">prayer168@gmail.com</a><br>
+    © 2026 陳賢宗（黑熊老師）版權所有　·　本網站教材供教育用途免費使用，請勿用於商業目的或未經授權之轉載、改作。
+  </div>
+</footer>
+
+<script>
+/* ============ 資料 ============ */
+const EXPERIMENTS = [
+  {n:1,name:"前導實驗：有無鋁片煞車比較",iv:"煞車區材料（無／塑膠／紙板／完整鋁片）",dv:"小車停止距離",purpose:"確認小車通過鋁片煞車區時，是否會比沒有鋁片或非金屬片時停得更快——先證明渦電流煞車現象存在。",
+   steps:["固定斜坡高度，例如 10 cm。","小車底部固定同一顆磁鐵。","依序更換煞車區材料。","每組從同一起點滑下 5–10 次。","測量煞車區末端到停止位置的距離。","計算平均停止距離，判斷鋁片是否有明顯煞車效果。"]},
+  {n:2,name:"磁鐵與鋁片距離對煞車效果的影響",iv:"磁鐵距離（0.5／1.0／1.5／2.0 cm）",dv:"停止距離與停止位置穩定性",purpose:"找出適合國小操作、效果明顯，又不會卡住或吸附的磁鐵距離。",
+   steps:["使用完整鋁片作為煞車片。","用墊片或可調支架改變磁鐵與鋁片距離。","每個距離重複測量 5–10 次。","記錄平均、最大、最小停止距離。","找出效果明顯但不會卡住或吸附的距離。"]},
+  {n:3,name:"不同開槽比例鋁片對煞車效果的影響",iv:"開槽比例（0%／25%／50%／75%）",dv:"停止距離、煞車倍率、資料穩定性",purpose:"探討鋁片被開槽後，渦電流路徑被破壞的程度是否影響煞車效果。",
+   steps:["準備大小、厚度相同的鋁片。","切出不同數量的平行槽線，使開槽比例不同。","每片依序放入煞車區。","保持小車、磁鐵距離與斜坡高度不變。","每組重複測量 5–10 次。","比較開槽比例越高時，停止距離是否增加。"]},
+  {n:4,name:"不同開槽方向對煞車效果的影響",iv:"開槽方向（直槽／橫槽／斜槽／網格槽）",dv:"停止距離、左右偏移、是否穩定通過",purpose:"比較不同槽線方向是否會改變渦電流路徑與煞車穩定性。",
+   steps:["準備四種開槽方向的鋁片，開槽面積盡量接近。","依序放入煞車區。","小車從相同起點滑下。","每組重複測量 5–10 次。","記錄停止距離與小車是否偏向某一側。","分析哪一種開槽方向最能穩定減速。"]},
+  {n:5,name:"進入煞車區速度對煞車效果的影響",iv:"斜坡高度（5／10／15 cm）",dv:"停止距離、是否衝出指定範圍",purpose:"探討小車速度不同時，渦電流煞車是否仍然有效。",
+   steps:["選擇完整鋁片與一種最佳開槽鋁片比較。","設定三種斜坡高度。","每種高度重複測量 5–10 次。","比較速度較快時，煞車距離是否增加。","判斷哪種鋁片結構在不同速度下較穩定。"]},
+  {n:6,name:"可調式渦電流煞車模組最佳化",iv:"鋁片結構、磁鐵距離、煞車區長度",dv:"指定停車區成功率與平均停止誤差",purpose:"整合前面結果，設計能讓小車穩定停在指定停車區的煞車模組（工程設計與成果驗證）。",
+   steps:["設定指定停車區，例如煞車區後 40–60 cm。","選擇最有潛力的鋁片結構。","調整磁鐵距離與煞車區長度。","每種組合重複測量 10 次。","計算停在指定區域的成功率。","找出最適合國小展示的可調式設計。"]},
+];
+
+const MATERIALS = [
+  "玩具小車 1–2 台（輪子需順暢，能直線滑行）",
+  "強力釹磁鐵 2–4 顆，直徑約 10–20 mm（產生磁場）",
+  "鋁片，厚度 0.5–1.0 mm，多片（製作煞車片，邊緣需磨平）",
+  "對照材料：塑膠片、紙板（與鋁片大小相同的非金屬對照組）",
+  "軌道材料：木板／塑膠／紙板軌道（需平整不歪斜）",
+  "固定材料：膠帶、熱熔膠、夾具（固定磁鐵與鋁片）",
+  "測量工具：直尺、捲尺（量停止距離，單位統一 cm）",
+  "量角器或高度尺（控制斜坡高度／角度）",
+  "影像工具：手機或平板＋腳架（錄影與慢動作分析）",
+];
+const SOFTWARE = [
+  "Google 試算表 或 Excel：輸入停止距離，計算平均、最大、最小值、標準差，製作長條圖與折線圖。",
+  "手機慢動作攝影：記錄小車通過煞車區的過程，輔助判斷是否偏移或晃動。",
+  "Tracker 影片分析軟體（選用）：分析小車速度變化，適合進階學生或教師協助。",
+  "PowerPoint 或 Canva：整理研究流程圖、照片、圖表與口頭報告。",
+];
+const SAFETY = [
+  "強力釹磁鐵吸力很強，操作時避免夾傷手指。",
+  "磁鐵需遠離手機、電腦、磁卡、手錶與電子設備。",
+  "鋁片切割、開槽與磨邊需由教師或成人協助。",
+  "鋁片邊緣需用銼刀磨平，必要時貼上膠帶保護。",
+  "小車軌道需固定，避免小車衝出桌面。",
+  "每次實驗前檢查磁鐵是否固定牢靠，避免滑行時脫落。",
+];
+const ANALYSIS = [
+  "用長條圖比較不同條件下的平均停止距離。",
+  "用誤差範圍或最大、最小值呈現穩定性。",
+  "計算煞車效果＝無鋁片平均停止距離 − 有鋁片平均停止距離。",
+  "計算指定停車區成功率＝成功次數 ÷ 總測試次數 × 100%。",
+  "將照片與慢動作影片截圖放入作品書，說明小車通過煞車區的過程。",
+  "討論結果是否符合假設；若不符合，說明可能原因（摩擦力、鋁片厚度、磁鐵距離、軌道不平等）。",
+];
+const REFS = [
+  ["國立臺灣科學教育館。〈強「磁」奪「鋁」-磁鐵於不完整鋁管中運動現象〉。","https://www.ntsec.edu.tw/science/detail.aspx?a=21&cat=12949&print=1&sid=13339"],
+  ["中華民國中小學科學展覽會。〈磁鐵在金屬管中掉落時間的因素探討及應用〉。","https://twsf.ntsec.gov.tw/activity/race-1/53/pdf/030109.pdf"],
+  ["中華民國中小學科學展覽會。〈磁浮現象在緩降機之應用〉。","https://twsf.ntsec.gov.tw/activity/race-1/47/pdf/030802.pdf"],
+  ["LibreTexts Physics. “Eddy Currents.”","https://phys.libretexts.org/Bookshelves/University_Physics/University_Physics_II_-_Thermodynamics_Electricity_and_Magnetism/13%3A_Electromagnetic_Induction/13.06%3A_Eddy_Currents"],
+  ["LibreTexts Physics. “Lenz’s Law.”","https://phys.libretexts.org/Courses/Coalinga_College/Physical_Science_for_Educators/12%3A_Magnetism/12.05%3A_Electromagnetism/12.5.05%3A_Lenz%27s_Law"],
+  ["Partovi, M. H., & Morris, E. J. (2004). Electrodynamics of a Magnet Moving through a Conducting Pipe. arXiv:physics/0406085.","https://arxiv.org/abs/physics/0406085"],
+  ["Goudsmit Magnetics. “What is eddy current?”","https://www.goudsmitmagnetics.com/en-us/knowledge-base-eddy-current"],
+  ["教育部國民及學前教育署（2018）。《十二年國民基本教育課程綱要：自然科學領域》。",""],
+];
+
+const QUIZ = [
+  {q:"渦電流煞車為什麼能讓小車減速，卻不用碰到車子？",
+   opts:["磁鐵把鐵製車身吸住","磁鐵和鋁片相對運動，在鋁片中感應出渦電流，產生反向磁場阻礙運動","小車的輪子卡住了","空氣阻力變大"],a:1,
+   ex:"磁鐵與導體（鋁片）有相對運動時，鋁片內感應出環狀渦電流，渦電流的磁場反抗原本的運動，形成非接觸式煞車。"},
+  {q:"冷次定律的核心精神是什麼？",
+   opts:["電流越大磁場越小","感應電流產生的效果會反抗造成它的變化","磁鐵一定會吸住金屬","溫度越高電流越大"],a:1,
+   ex:"冷次定律：感應電流的方向，總是反抗造成它的磁場變化。磁鐵靠近被推開、離開被拉住，都在阻礙運動。"},
+  {q:"把鋁片開很多槽（開槽比例高），煞車效果通常會怎樣？",
+   opts:["變強，因為槽讓電流更順","變弱，因為渦電流的路徑被切斷","完全不變","鋁片會變成磁鐵"],a:1,
+   ex:"渦電流需要連續的環狀路徑。開槽切斷了這些路徑，渦電流變弱，煞車力下降——工程上正是用這招減少不必要的渦電流損耗。"},
+  {q:"想讓煞車更強，磁鐵和鋁片的距離應該？",
+   opts:["越遠越好","越近越好（但太近會卡住或吸附）","距離沒有影響","剛好 10 公尺"],a:1,
+   ex:"距離越近，鋁片感受到的磁場越強，渦電流與煞車力越大；但太近可能卡住或吸附，所以要找出可操作的最佳距離。"},
+  {q:"這個研究和常見的「磁鐵落入鋁管」題目，最大的不同是？",
+   opts:["只是換了顏色","重點從『證明渦電流存在』轉向『用結構設計控制煞車強弱』","不用磁鐵","改成研究電池"],a:1,
+   ex:"本研究的核心問題是工程設計取向：能不能透過開槽鋁片把煞車調到剛剛好，讓小車穩定停在指定停車區。"},
+];
+
+/* ============ 渲染列表 ============ */
+const el = s=>document.querySelector(s);
+const make = (tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;};
+
+// experiments
+const expList = el('#expList');
+EXPERIMENTS.forEach(e=>{
+  const d=make('details','exp'); if(e.n===1)d.open=true;
+  d.innerHTML=`<summary><span class="num">${e.n}</span><span>實驗${['一','二','三','四','五','六'][e.n-1]}・${e.name}</span><span class="chev">▾</span></summary>
+   <div class="body">
+     <p style="margin-top:14px"><strong>目的：</strong>${e.purpose}</p>
+     <div class="vars">
+       <span class="tag iv">自變因：${e.iv}</span>
+       <span class="tag dv">應變因：${e.dv}</span>
+       <span class="tag cv">控制變因：小車重量・磁鐵大小位置・軌道角度・起點・煞車區長度・測量方式</span>
+     </div>
+     <strong>實驗步驟：</strong>
+     <ol>${e.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+   </div>`;
+  expList.appendChild(d);
+});
+
+const fill=(sel,arr)=>{const u=el(sel);arr.forEach(t=>u.appendChild(make('li',null,t)));};
+fill('#matList',MATERIALS); fill('#softList',SOFTWARE); fill('#safeList',SAFETY); fill('#anaList',ANALYSIS);
+
+const refList=el('#refList');
+REFS.forEach(([t,u])=>{
+  const li=make('li',null, u? `${t} <a href="${u}" target="_blank" rel="noopener">連結 ↗</a>` : t);
+  refList.appendChild(li);
+});
+
+// quiz
+const quizBox=el('#quizBox'); let answered=0,correct=0;
+QUIZ.forEach((item,qi)=>{
+  const box=make('div','q');
+  box.innerHTML=`<div class="qt">Q${qi+1}. ${item.q}</div>`;
+  const explain=make('div','explain',`💡 ${item.ex}`);
+  item.opts.forEach((o,oi)=>{
+    const b=make('button','opt',o);
+    b.onclick=()=>{
+      if(box.dataset.done)return; box.dataset.done=1; answered++;
+      if(oi===item.a){b.classList.add('correct');correct++;}
+      else{b.classList.add('wrong');box.querySelectorAll('.opt')[item.a].classList.add('correct');}
+      explain.classList.add('show');
+      el('#score').textContent=`${correct} / ${QUIZ.length}`;
+    };
+    box.appendChild(b);
+  });
+  box.appendChild(explain); quizBox.appendChild(box);
+});
+
+/* ============ nav ============ */
+el('#menuBtn').onclick=()=>el('#links').classList.toggle('open');
+el('#links').querySelectorAll('a').forEach(a=>a.onclick=()=>el('#links').classList.remove('open'));
+
+/* ============ Canvas helpers ============ */
+function fitCanvas(c){const dpr=Math.min(devicePixelRatio||1,2);const w=c.clientWidth;const h=c.clientHeight||c.height;c.width=w*dpr;c.height=h*dpr;const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return{ctx,w,h};}
+
+/* ---- Hero background: drifting field lines + particles ---- */
+(function(){
+  const c=el('#heroCanvas');let W,H,ctx,t=0,parts=[];
+  function setup(){const r=fitCanvas(c);ctx=r.ctx;W=r.w;H=r.h;parts=[];for(let i=0;i<46;i++)parts.push({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*2,s:.2+Math.random()*.6,p:Math.random()*6.28});}
+  function loop(){t+=.012;ctx.clearRect(0,0,W,H);
+    for(const p of parts){p.y-=p.s;p.x+=Math.sin(t+p.p)*.4;if(p.y<-5){p.y=H+5;p.x=Math.random()*W;}
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.28);ctx.fillStyle='rgba(110,231,255,'+(.15+p.r*.12)+')';ctx.fill();}
+    // concentric rings
+    for(let k=0;k<4;k++){const rr=60+k*70+Math.sin(t+k)*10;ctx.beginPath();ctx.arc(W*0.78,H*0.3,rr,0,6.28);ctx.strokeStyle='rgba(62,166,255,'+(.10-k*.02)+')';ctx.lineWidth=2;ctx.stroke();}
+    requestAnimationFrame(loop);}
+  setup();loop();addEventListener('resize',setup);
+})();
+
+/* ---- Eddy current principle ---- */
+(function(){
+  const c=el('#eddyCanvas');let W,H,ctx,t=0;let speed=.55;
+  el('#eddySpeed').addEventListener('input',e=>{speed=e.target.value/100;
+    el('#spdVal').textContent= speed<.25?'很慢': speed<.55?'慢': speed<.8?'中':'快';});
+  function setup(){const r=fitCanvas(c);ctx=r.ctx;W=r.w;H=r.h;}
+  function arrow(x,y,dx,dy,col,wd){ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=wd||3;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+dx,y+dy);ctx.stroke();
+    const a=Math.atan2(dy,dx),s=8;ctx.beginPath();ctx.moveTo(x+dx,y+dy);
+    ctx.lineTo(x+dx-s*Math.cos(a-.4),y+dy-s*Math.sin(a-.4));ctx.lineTo(x+dx-s*Math.cos(a+.4),y+dy-s*Math.sin(a+.4));ctx.closePath();ctx.fill();}
+  function loop(){t+=.02+speed*.08;ctx.clearRect(0,0,W,H);
+    const plateY=H*0.62, plateH=70;
+    // aluminum plate
+    const g=ctx.createLinearGradient(0,plateY,0,plateY+plateH);g.addColorStop(0,'#d7dee9');g.addColorStop(1,'#9aa6b6');
+    ctx.fillStyle=g;ctx.fillRect(20,plateY,W-40,plateH);
+    ctx.fillStyle='rgba(0,0,0,.18)';for(let x=30;x<W-30;x+=14)ctx.fillRect(x,plateY,1,plateH);
+    // magnet moving back & forth
+    const mx=W/2+Math.sin(t)*Math.min(W*0.3,150);const my=plateY-46;
+    const moving=Math.cos(t)*Math.min(W*0.3,150);// velocity direction
+    // two eddy loops under magnet (swirl)
+    const intensity=Math.min(1,Math.abs(moving)/120)*(.4+speed);
+    for(let s=-1;s<=1;s+=2){
+      const cx=mx+s*40, cy=plateY+plateH*0.5;
+      ctx.strokeStyle='rgba(110,231,255,'+(0.25+intensity*0.6)+')';ctx.lineWidth=2.4;
+      for(let ring=0;ring<3;ring++){const rad=8+ring*9;ctx.beginPath();
+        const off=t*3*s;ctx.arc(cx,cy,rad,off,off+5.3);ctx.stroke();
+        // arrowhead on ring
+        const ea=off+5.3;ctx.fillStyle='rgba(110,231,255,'+(0.3+intensity*0.6)+')';
+        ctx.beginPath();ctx.arc(cx+rad*Math.cos(ea),cy+rad*Math.sin(ea),2.2,0,6.28);ctx.fill();}
+    }
+    // magnet body
+    ctx.fillStyle='#e64a5a';ctx.fillRect(mx-26,my-18,52,22);
+    ctx.fillStyle='#3a7bd5';ctx.fillRect(mx-26,my+4,52,22);
+    ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';
+    ctx.fillText('N',mx,my-2);ctx.fillText('S',mx,my+20);
+    // velocity arrow (white)
+    if(Math.abs(moving)>10)arrow(mx,my-30,Math.sign(moving)*36,0,'#ffffff',3);
+    // opposing force arrow (green) — opposite to motion
+    if(Math.abs(moving)>10){const f=Math.min(1,Math.abs(moving)/120)*(.5+speed);
+      arrow(mx,plateY-2,-Math.sign(moving)*46*f,0,'#4ade80',4);}
+    ctx.textAlign='left';ctx.fillStyle='rgba(159,179,214,.9)';ctx.font='13px sans-serif';
+    ctx.fillText('白：磁鐵運動方向　綠：渦電流的反作用力（阻礙運動）',24,plateY-58);
+    requestAnimationFrame(loop);}
+  setup();loop();addEventListener('resize',setup);
+})();
+
+/* ---- Lenz interactive (drag magnet) ---- */
+(function(){
+  const c=el('#lenzCanvas');let W,H,ctx;let mx=null,prev=null,vel=0,dragging=false;
+  function setup(){const r=fitCanvas(c);ctx=r.ctx;W=r.w;H=r.h;if(mx===null)mx=W*0.3;draw();}
+  function pos(ev){const rect=c.getBoundingClientRect();const x=(ev.touches?ev.touches[0].clientX:ev.clientX)-rect.left;return x;}
+  c.addEventListener('pointerdown',e=>{dragging=true;prev=pos(e);c.setPointerCapture(e.pointerId);});
+  c.addEventListener('pointermove',e=>{if(!dragging)return;const x=pos(e);vel=x-prev;prev=x;mx=Math.max(40,Math.min(W*0.55,x));draw();});
+  c.addEventListener('pointerup',()=>{dragging=false;vel=0;draw();});
+  c.addEventListener('pointerleave',()=>{dragging=false;vel=0;});
+  function ring(cx,cy,r,dir,col){ctx.strokeStyle=col;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(cx,cy,r*0.5,r,0,0,6.28);ctx.stroke();
+    // arrow showing current direction
+    const ax=cx+(dir>0?r*0.5:-r*0.5);ctx.fillStyle=col;ctx.beginPath();ctx.arc(ax,cy,4,0,6.28);ctx.fill();}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    const cy=H/2, plateX=W*0.66;
+    // coil/plate (rings)
+    for(let i=0;i<3;i++){ctx.strokeStyle='rgba(199,208,220,.8)';ctx.lineWidth=4;ctx.beginPath();
+      ctx.ellipse(plateX+i*7,cy,28,80,0,0,6.28);ctx.stroke();}
+    // induced current depends on velocity sign & whether approaching
+    const approaching = mx < plateX;
+    let txt, col, dir;
+    if(Math.abs(vel)<0.6){ txt='靜止：沒有磁場變化 → 沒有感應電流'; col='rgba(148,163,184,.6)'; dir=0;
+      el('#lenzState').textContent='磁鐵靜止不動';
+      el('#lenzText').innerHTML='磁場沒有改變，就<strong>不會</strong>有感應電流，也沒有煞車力。<strong>必須有相對運動</strong>，渦電流才會出現。';
+    } else {
+      const towards = vel>0; // moving right toward plate
+      dir = towards? 1 : -1;
+      col = towards? '#fb7185' : '#6ee7ff';
+      if(towards){ el('#lenzState').textContent='磁鐵靠近 → 排斥（推開）';
+        el('#lenzText').innerHTML='磁鐵靠近時，線圈感應電流形成<strong>同極</strong>磁場把磁鐵<strong>推開</strong>，阻礙它繼續靠近。'; txt='靠近：感應電流產生排斥力';}
+      else{ el('#lenzState').textContent='磁鐵遠離 → 吸引（拉住）';
+        el('#lenzText').innerHTML='磁鐵遠離時，線圈感應電流形成<strong>異極</strong>磁場把磁鐵<strong>拉住</strong>，阻礙它離開。'; txt='遠離：感應電流產生吸引力';}
+    }
+    if(dir!==0)for(let i=0;i<3;i++)ring(plateX+i*7,cy,80,dir,col);
+    // magnet
+    ctx.fillStyle='#e64a5a';ctx.fillRect(mx-22,cy-34,44,34);
+    ctx.fillStyle='#3a7bd5';ctx.fillRect(mx-22,cy,44,34);
+    ctx.fillStyle='#fff';ctx.font='bold 14px sans-serif';ctx.textAlign='center';
+    ctx.fillText('N',mx,cy-12);ctx.fillText('S',mx,cy+22);
+    // hint
+    ctx.fillStyle='rgba(159,179,214,.9)';ctx.font='12px sans-serif';ctx.fillText(txt,W/2,H-12);
+    ctx.textAlign='left';}
+  setup();addEventListener('resize',setup);
+})();
+
+/* ============ 煞車模擬器 ============ */
+(function(){
+  const c=el('#simCanvas');let W,H,ctx;
+  const state={slot:0,dir:'straight',gap:10,ramp:10};
+  let anim=null;
+
+  // segmented controls
+  function bindSeg(id,key,cb){el(id).querySelectorAll('.seg').forEach(s=>{
+    s.onclick=()=>{el(id).querySelectorAll('.seg').forEach(x=>x.classList.remove('active'));s.classList.add('active');
+      state[key]=isNaN(+s.dataset.v)?s.dataset.v:+s.dataset.v;cb&&cb();draw();};});}
+  const dirNames={straight:'直槽',cross:'橫槽',diag:'斜槽',grid:'網格'};
+  bindSeg('#segSlot','slot',()=>el('#vSlot').textContent= state.slot===0?'0%（完整鋁片）':state.slot+'%');
+  bindSeg('#segDir','dir',()=>el('#vDir').textContent=dirNames[state.dir]);
+  el('#rngGap').addEventListener('input',e=>{state.gap=+e.target.value;el('#vGap').textContent=(state.gap/10).toFixed(1)+' cm';draw();});
+  el('#rngRamp').addEventListener('input',e=>{state.ramp=+e.target.value;el('#vRamp').textContent=state.ramp+' cm';draw();});
+
+  // physics model -------------------------------------------------
+  // direction factor: how well slots preserve eddy braking (1 = strong)
+  const dirFactor={straight:0.72,cross:0.92,diag:0.82,grid:0.58};
+  // stability (lower = more side drift)
+  const dirStable={straight:0.78,cross:0.9,diag:0.82,grid:0.97};
+  function model(){
+    const v0 = 80*Math.sqrt(state.ramp/10);          // entry speed cm/s
+    const gapCm=state.gap/10;
+    const magFactor = 1/(gapCm*gapCm) / (1/(1.0)) ;   // normalized to 1.0cm=1
+    const slotF = 1 - 0.62*(state.slot/100);          // slots cut current paths
+    const dF = dirFactor[state.dir];
+    // braking coefficient (velocity-proportional eddy drag) — tuned so eddy force dominates
+    let b = 0.6 * magFactor * slotF * dF;
+    return {v0,b};
+  }
+  // numerically integrate stopping distance with eddy drag b*v + rolling friction
+  function simulate(v0,b){
+    let v=v0,x=0,dt=0.01,fric=10; // rolling friction cm/s^2
+    const traj=[];let tt=0,safety=0;
+    while(v>0.5 && safety<6000){const a=-b*v - fric; v+=a*dt; if(v<0)v=0; x+=v*dt; tt+=dt; traj.push({t:tt,x:x,v:v});safety++;}
+    return {dist:x,traj};
+  }
+
+  // layout
+  const TRACK={x0:40, brakeStart:0, brakeLen:90, scale:1};
+  function setup(){const r=fitCanvas(c);ctx=r.ctx;W=r.w;H=r.h;
+    TRACK.brakeStart=Math.min(230,W*0.34);
+    draw();}
+
+  function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  // world->screen: world cm measured from brake-zone end. screen px.
+  const PXPERCM=2.0;
+  function drawScene(carWorldX, slowGlow){
+    ctx.clearRect(0,0,W,H);
+    const baseY=H*0.66;
+    const rampTopY = baseY - (state.ramp*4+24);
+    // background ground
+    ctx.fillStyle='#0a1426';ctx.fillRect(0,0,W,H);
+    // ramp (left)
+    const rx=20, rtop=rampTopY, rbot=baseY, rw=TRACK.brakeStart-40;
+    ctx.fillStyle='#1b2c4d';ctx.beginPath();ctx.moveTo(rx,rbot);ctx.lineTo(rx+rw,rbot);ctx.lineTo(rx+rw,rtop);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#3ea6ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(rx,rbot-2);ctx.lineTo(rx+rw,rtop-2);ctx.stroke();
+    ctx.fillStyle='rgba(159,179,214,.9)';ctx.font='12px sans-serif';ctx.fillText('斜坡 '+state.ramp+' cm',rx+6,rtop-6);
+    // track baseline
+    ctx.strokeStyle='#28406e';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(TRACK.brakeStart-rw* -0+0,baseY);ctx.lineTo(W-10,baseY);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(20,baseY);ctx.lineTo(W-10,baseY);ctx.stroke();
+    // brake zone (aluminum plate with slots)
+    const bz=TRACK.brakeStart, bzW=TRACK.brakeLen;
+    const ag=ctx.createLinearGradient(0,baseY,0,baseY+18);ag.addColorStop(0,'#d7dee9');ag.addColorStop(1,'#9aa6b6');
+    ctx.fillStyle=ag;ctx.fillRect(bz,baseY,bzW,16);
+    // slots pattern
+    ctx.strokeStyle='rgba(20,30,50,.65)';ctx.lineWidth=2;
+    const nSlot=Math.round(state.slot/100*8);
+    if(state.dir==='straight'){for(let i=1;i<=nSlot;i++){const x=bz+bzW*i/(nSlot+1);ctx.beginPath();ctx.moveTo(x,baseY+2);ctx.lineTo(x,baseY+14);ctx.stroke();}}
+    else if(state.dir==='cross'){for(let i=1;i<=nSlot;i++){const y=baseY+16*i/(nSlot+1);ctx.beginPath();ctx.moveTo(bz+2,y);ctx.lineTo(bz+bzW-2,y);ctx.stroke();}}
+    else if(state.dir==='diag'){for(let i=1;i<=nSlot;i++){const x=bz+bzW*i/(nSlot+1);ctx.beginPath();ctx.moveTo(x-6,baseY+2);ctx.lineTo(x+6,baseY+14);ctx.stroke();}}
+    else{for(let i=1;i<=nSlot;i++){const x=bz+bzW*i/(nSlot+1);ctx.beginPath();ctx.moveTo(x,baseY+2);ctx.lineTo(x,baseY+14);ctx.stroke();}
+      for(let i=1;i<=Math.max(1,Math.round(nSlot/2));i++){const y=baseY+16*i/(Math.round(nSlot/2)+1);ctx.beginPath();ctx.moveTo(bz+2,y);ctx.lineTo(bz+bzW-2,y);ctx.stroke();}}
+    ctx.fillStyle='rgba(159,179,214,.9)';ctx.font='12px sans-serif';ctx.fillText('煞車區（鋁片）',bz,baseY-6);
+
+    // target zone: 40-60 cm after brake end
+    const tgA=bz+bzW+40*PXPERCM, tgB=bz+bzW+60*PXPERCM;
+    ctx.fillStyle='rgba(74,222,128,.16)';ctx.fillRect(tgA,baseY-40,tgB-tgA,40);
+    ctx.strokeStyle='rgba(74,222,128,.8)';ctx.setLineDash([5,4]);ctx.strokeRect(tgA,baseY-40,tgB-tgA,40);ctx.setLineDash([]);
+    ctx.fillStyle='#4ade80';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText('停車格',(tgA+tgB)/2,baseY-46);ctx.textAlign='left';
+
+    // distance ruler ticks
+    ctx.fillStyle='rgba(120,140,180,.5)';ctx.font='10px sans-serif';
+    for(let cm=0;cm<=120;cm+=20){const x=bz+bzW+cm*PXPERCM;if(x>W-6)break;ctx.fillRect(x,baseY+18,1,5);ctx.fillText(cm+'',x-4,baseY+32);}
+
+    // car
+    const carScreenX = (carWorldX!=null)? bz+bzW+carWorldX*PXPERCM : bz - bzW*0.2 - 30;
+    drawCar(carScreenX, baseY, slowGlow);
+  }
+  function drawCar(cx,baseY,glow){
+    const y=baseY-14;
+    // glow when braking
+    if(glow>0){ctx.fillStyle='rgba(110,231,255,'+(glow*0.5)+')';ctx.beginPath();ctx.arc(cx,baseY-4,26*glow+10,0,6.28);ctx.fill();}
+    ctx.fillStyle='#e9eef7';roundRect(cx-22,y-12,44,18,5);ctx.fill();
+    ctx.fillStyle='#3ea6ff';roundRect(cx-14,y-10,20,9,3);ctx.fill();
+    // magnet under car
+    ctx.fillStyle='#e64a5a';ctx.fillRect(cx-8,y+6,7,5);ctx.fillStyle='#3a7bd5';ctx.fillRect(cx-1,y+6,7,5);
+    // wheels
+    ctx.fillStyle='#0a1426';ctx.strokeStyle='#9fb3d6';ctx.lineWidth=2;
+    [[-13,0],[13,0]].forEach(([dx])=>{ctx.beginPath();ctx.arc(cx+dx,baseY-2,6,0,6.28);ctx.fill();ctx.stroke();});
+  }
+
+  function draw(){drawScene(null,0);}
+
+  function launch(){
+    if(anim)cancelAnimationFrame(anim);
+    const {v0,b}=model();
+    const {dist,traj}=simulate(v0,b);
+    el('#rSpeed').textContent=Math.round(v0);
+    // animate: car travels through an approach phase, then brakes within the zone
+    const pts=[];
+    const approachCm=45; const approachSteps=24;
+    for(let k=0;k<approachSteps;k++)pts.push({x:-approachCm+approachCm*k/approachSteps, glow:0});
+    traj.forEach((p)=>pts.push({x:p.x, glow:Math.min(1,(b*p.v)/40)}));
+    let j=0; const stride=Math.max(2,Math.ceil(pts.length/110)); // ~2s regardless of distance
+    function frame2(){
+      const p=pts[Math.min(j,pts.length-1)];
+      drawScene(p.x,p.glow);
+      j+=stride;
+      if(j<pts.length)anim=requestAnimationFrame(frame2);
+      else {drawScene(pts[pts.length-1].x,0);finish(dist);}
+    }
+    frame2();
+  }
+  function finish(dist){
+    el('#rDist').textContent=Math.round(dist);
+    const res=el('#rResult'), adv=el('#advice');
+    let label,color,msg;
+    if(dist<40){label='停太短';color='var(--accent)';msg='💛 煞車太強，小車還沒到停車格就停了。試試：增加開槽比例、加大磁鐵距離，或選網格槽把煞車調弱一點。';}
+    else if(dist<=60){label='剛剛好！';color='var(--good)';msg='💚 太棒了！小車剛好停在停車格（40–60 cm）。記下這組組合，這就是工程設計要找的最佳解。';}
+    else if(dist<=110){label='衝過頭';color='var(--bad)';msg='❤️ 煞車不夠力，小車衝出停車格。試試：降低開槽比例（用完整鋁片）、縮小磁鐵距離，或降低斜坡高度。';}
+    else{label='幾乎沒煞車';color='var(--bad)';msg='❤️ 小車幾乎沒被煞住。把磁鐵距離調近、改用完整鋁片（0% 開槽），煞車力會大幅提升。';}
+    res.textContent=label; res.style.color=color;
+    adv.innerHTML='🎯 '+msg;
+  }
+  el('#launchBtn').onclick=launch;
+  el('#resetBtn').onclick=()=>{if(anim)cancelAnimationFrame(anim);el('#rDist').textContent='–';el('#rResult').textContent='就緒';el('#rResult').style.color='#fff';el('#rSpeed').textContent='0';el('#advice').innerHTML='🎯 目標：讓小車停在綠色停車格（煞車區後 40–60 cm）內。提示：完整鋁片煞車最強，但太強會停太短；試著用「開槽」把煞車調弱一點點。';draw();};
+
+  setup();addEventListener('resize',setup);
+})();
+</script>
+</body>
+</html>
