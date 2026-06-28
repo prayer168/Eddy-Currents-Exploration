@@ -723,14 +723,28 @@ function fitCanvas(c){const dpr=Math.min(devicePixelRatio||1,2);const w=c.client
   function drawScene(carWorldX, slowGlow){
     ctx.clearRect(0,0,W,H);
     const baseY=H*0.66;
-    const rampTopY = baseY - (state.ramp*4+24);
     // background ground
     ctx.fillStyle='#0a1426';ctx.fillRect(0,0,W,H);
-    // ramp (left)
-    const rx=20, rtop=rampTopY, rbot=baseY, rw=TRACK.brakeStart-40;
-    ctx.fillStyle='#1b2c4d';ctx.beginPath();ctx.moveTo(rx,rbot);ctx.lineTo(rx+rw,rbot);ctx.lineTo(rx+rw,rtop);ctx.closePath();ctx.fill();
-    ctx.strokeStyle='#3ea6ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(rx,rbot-2);ctx.lineTo(rx+rw,rtop-2);ctx.stroke();
-    ctx.fillStyle='rgba(159,179,214,.9)';ctx.font='12px sans-serif';ctx.fillText('斜坡 '+state.ramp+' cm',rx+6,rtop-6);
+    // ramp (left, high)：高點在左、斜面往右下降，小車從左上滑下進入右側煞車區
+    // 以「固定水平長度 RAMP_RUN_CM」為基準，使顯示角度具物理意義且與裝置寬度無關
+    const RAMP_RUN_CM=30;
+    const rx=20, rbot=baseY, rw=TRACK.brakeStart-40;
+    const theta=Math.atan2(state.ramp,RAMP_RUN_CM), deg=Math.round(theta*180/Math.PI);
+    const heightPx=rw*Math.tan(theta), rtop=rbot-heightPx;
+    // 三角形：左上(高) → 左下 → 右下(斜面底端，接水平軌道)
+    ctx.fillStyle='#1b2c4d';ctx.beginPath();ctx.moveTo(rx,rtop);ctx.lineTo(rx,rbot);ctx.lineTo(rx+rw,rbot);ctx.closePath();ctx.fill();
+    // 斜面（小車滑行的面）
+    ctx.strokeStyle='#3ea6ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(rx,rtop);ctx.lineTo(rx+rw,rbot);ctx.stroke();
+    // 下滑方向箭頭
+    ctx.fillStyle='#6ee7ff';const ax=rx+rw*0.5,ay=rtop+heightPx*0.5;const ux=Math.cos(theta),uy=Math.sin(theta);
+    ctx.beginPath();ctx.moveTo(ax+ux*10,ay+uy*10);ctx.lineTo(ax+ux*10-uy*5-ux*8,ay+uy*10+ux*5-uy*8);ctx.lineTo(ax+ux*10+uy*5-ux*8,ay+uy*10-ux*5-uy*8);ctx.closePath();ctx.fill();
+    // 角度弧線（斜面底端，斜面與水平線的夾角）
+    const cx=rx+rw, cy=rbot;
+    ctx.strokeStyle='#ffd166';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,30,Math.PI,Math.PI+theta,false);ctx.stroke();
+    ctx.fillStyle='#ffd166';ctx.font='bold 13px sans-serif';ctx.textAlign='right';
+    ctx.fillText('θ ≈ '+deg+'°',cx-34,cy-6);ctx.textAlign='left';
+    // 高度標示
+    ctx.fillStyle='rgba(159,179,214,.95)';ctx.font='12px sans-serif';ctx.fillText('斜坡高度 '+state.ramp+' cm',rx+4,rtop-6);
     // track baseline
     ctx.strokeStyle='#28406e';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(TRACK.brakeStart-rw* -0+0,baseY);ctx.lineTo(W-10,baseY);ctx.stroke();
     ctx.beginPath();ctx.moveTo(20,baseY);ctx.lineTo(W-10,baseY);ctx.stroke();
